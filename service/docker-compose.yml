@@ -73,6 +73,56 @@ services:
       - backend
     restart: always
 
+  #redis集群配置start
+  redis-cluster-master:
+    build:
+      context: ./redis-cluster/redis-master
+    environment:
+      - TZ=${TZ}
+      # - REDIS_REPLICATION_MODE=master
+      # - REDIS_PASSWORD=masterpassword123
+      # - NODE_ID=1
+      # - NODES=3
+    privileged: true
+    volumes:
+      - ${DATA_PATH_HOST}/redis-cluster/redis-master:/data                 # 引用 .env 配置中 DATA_PATH_HOST 变量，将宿主机上存放 Redis 数据的目录挂载到容器中 /data 目录
+    ports:
+      - "${REDIS_CLUSTER_MASTER}:6379"                          # 设置容器6379端口映射指定宿主机端口
+    networks:
+      - backend
+    restart: always
+  redis-cluster-slave1:
+    build:
+      context: ./redis-cluster/redis-slave1
+    environment:
+      - TZ=${TZ}
+    privileged: true
+    volumes:
+      - ${DATA_PATH_HOST}/redis-cluster/redis-slave1:/data                 # 引用 .env 配置中 DATA_PATH_HOST 变量，将宿主机上存放 Redis 数据的目录挂载到容器中 /data 目录
+    command:
+      "redis-server --slaveof redis-cluster-master 6379"
+    ports:
+      - "${REDIS_CLUSTER_SLAVE1}:6379"                          # 设置容器6379端口映射指定宿主机端口
+    networks:
+      - backend
+    restart: always
+  redis-cluster-slave2:
+    build:
+      context: ./redis-cluster/redis-slave2
+    environment:
+      - TZ=${TZ}
+    privileged: true
+    volumes:
+      - ${DATA_PATH_HOST}/redis-cluster/redis-slave2:/data                 # 引用 .env 配置中 DATA_PATH_HOST 变量，将宿主机上存放 Redis 数据的目录挂载到容器中 /data 目录
+    command:
+      "redis-server --slaveof redis-cluster-master 6379"
+    ports:
+      - "${REDIS_CLUSTER_SLAVE2}:6379"                          # 设置容器6379端口映射指定宿主机端口
+    networks:
+      - backend
+    restart: always
+  #redis集群配置end  
+
   mysql-manage:
     build:
       context: ./mysql-manage
