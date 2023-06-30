@@ -16,7 +16,7 @@ services:
       - ${CODE_PATH_HOST}:/usr/src/code  # 引用 .env 配置中 CODE_PATH_HOST 变量，将宿主机上代码存放的目录挂载到容器中 /usr/src/code 目录
     ports:                               # 设置端口映射
       - "8000:8000"
-      - "8001:8001"
+      # - "8001:8001"
       - "8002:8002"
       - "8003:8003"
       - "9000:9000"
@@ -28,20 +28,6 @@ services:
     networks:
       - backend
     restart: always                      # 指定容器退出后的重启策略为始终重启
-
-  etcd:                                  # 自定义容器名称
-    build:
-      context: ./etcd                    # 指定构建使用的 Dockerfile 文件
-    environment:
-      - TZ=${TZ}
-      - ALLOW_NONE_AUTHENTICATION=yes
-      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
-    ports:                               # 设置端口映射
-      - "${ETCD_PORT}:2379"
-    networks:
-      - backend
-    restart: always
-
   mysql:
     build:
       context: ./mysql
@@ -69,6 +55,20 @@ services:
       - ${DATA_PATH_HOST}/redis:/data                 # 引用 .env 配置中 DATA_PATH_HOST 变量，将宿主机上存放 Redis 数据的目录挂载到容器中 /data 目录
     ports:
       - "${REDIS_PORT}:6379"                          # 设置容器6379端口映射指定宿主机端口
+    networks:
+      - backend
+    restart: always
+  redis-search:
+    build:
+      context: ./redis-search
+    environment:
+      - TZ=${TZ}
+    privileged: true
+    command: redis-server --loadmodule /usr/lib/redis/modules/redisearch.so
+    volumes:
+      - ${DATA_PATH_HOST}/redis-search:/data                 # 引用 .env 配置中 DATA_PATH_HOST 变量，将宿主机上存放 Redis 数据的目录挂载到容器中 /data 目录
+    ports:
+      - "${REDIS_SEARCH_PORT}:6379"                          # 设置容器6379端口映射指定宿主机端口
     networks:
       - backend
     restart: always
@@ -159,19 +159,6 @@ services:
       - backend
     restart: always
 
-  etcd-manage:
-    build:
-      context: ./etcd-manage
-    environment:
-      - TZ=${TZ}
-    ports:
-      - "${ETCD_MANAGE_PORT}:8080"                    # 设置容器8080端口映射指定宿主机端口，用于宿主机访问可视化web
-    depends_on:                                       # 依赖容器
-      - etcd                                          # 在 etcd 服务容器启动后启动
-    networks:
-      - backend
-    restart: always
-
   prometheus:
     build:
       context: ./prometheus
@@ -239,3 +226,29 @@ services:
       - ${DATA_PATH_HOST}/mongo:/data/db
       - ${LOG_PATH_HOST}/mongo:/var/log/mongodb
       - ${CONFIG_PATH_HOST}/mongo:/etc/mongo
+  elasticsearch:
+    build:
+      context: ./elasticsearch
+    ports:
+      - "${ELASTICSEARCH_PORT1}:9200"
+      - "${ELASTICSEARCH_PORT2}:9300"
+    container_name: "elasticsearch"
+    environment:
+      # 单节点     
+      - discovery.type=single-node
+      - "- ES_JAVA_OPTS=-Xms2G -Xmx4G"
+    volumes:
+      - ${CONFIG_PATH_HOST}/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ${DATA_PATH_HOST}/elasticsearch:/usr/share/elasticsearch/data
+      - ${CONFIG_PATH_HOST}/elasticsearch/plugins:/usr/share/elasticsearch/plugins
+  kibana:
+    build:
+      context: ./kibana
+    ports:
+      - "${KIBANA_PORT}:5601"
+    container_name: "kibana"
+    #restart: always
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ${CONFIG_PATH_HOST}/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
