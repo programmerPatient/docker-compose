@@ -252,3 +252,22 @@ services:
       - elasticsearch
     volumes:
       - ${CONFIG_PATH_HOST}/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+  rabbitmq:
+    #镜像  这个版本可以到docker-hub去获取自己想要的版本
+    image: rabbitmq:3.9.13-management
+    # 容器名
+    container_name: rabbitmq
+    # 是否支持重启
+    restart: always
+    hostname: rabbitmq
+    ports:
+      - 15672:15672
+    # 容器卷
+    volumes:
+      - ${DATA_PATH_HOST}/data/rabbitmq/:/var/lib/rabbitmq
+      - ${CONFIG_PATH_HOST}/rabbitmq/rabbitmq.sh:/etc/rabbitmq/rabbitmq.sh
+    # 环境配置
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest  # 账号
+      - RABBITMQ_DEFAULT_PASS=guest  # 密码
+      - RABBITMQ_ERLANG_COOKIE=hellocookie
