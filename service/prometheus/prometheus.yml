@@ -1,10 +1,42 @@
+
 global:
-  scrape_interval:     15s # 默认抓取周期
-  external_labels:
-    monitor: 'codelab-monitor'
+  scrape_interval:     15s #  # 默认抓取周期
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets: ['192.168.21.23:9093']
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  - "/opt/bitnami/prometheus/conf/group.yml"
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
 scrape_configs:
-  - job_name: 'node-exporter' #服务的名称
+  - job_name: 'golang服务' #服务的名称
     scrape_interval: 5s
     metrics_path: /metrics  #获取指标的url
     static_configs:
-      - targets: ['192.168.22.149:8990'] # 这个为监听指定服务服务的ip和port，需要修改为自己的ip，貌似云服务必须用公网ip
+      - targets: [
+        '192.168.21.23:8990',
+        "mini-test.xdjy100.com",
+        # "192.168.22.149",
+        # "192.168.22.149:8991",
+        # "192.168.22.149:8993",
+        # "192.168.22.149:8994",
+        # "192.168.22.149:8995",
+        # "192.168.22.149:8999",
+        # "192.168.22.149:8996",
+        # "192.168.22.149:8950",
+        # "192.168.22.149:8930",
+        # "192.168.22.149:8940",
+        # "192.168.22.149:8960",
+        # "192.168.22.149:8970",
+        # "192.168.22.149:8980",
+        # "192.168.22.149:8290"
+        ] # 这个为监听指定服务服务的ip和port，需要修改为自己的ip，貌似云服务必须用公网ip

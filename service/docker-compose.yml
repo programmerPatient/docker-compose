@@ -166,9 +166,27 @@ services:
       - TZ=${TZ}
     privileged: true
     volumes:
+      - ${DATA_PATH_HOST}/prometheus/prometheus:/etc/prometheus
+      - ${DATA_PATH_HOST}/prometheus/prometheus_data:/prometheus
       - ./prometheus/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml  # 将 prometheus 配置文件挂载到容器里
+      - ./prometheus/group.yml:/opt/bitnami/prometheus/conf/group.yml  # 将 prometheus 配置文件挂载到容器里
     ports:
       - "${PROMETHEUS_PORT}:9090"                     # 设置容器9090端口映射指定宿主机端口，用于宿主机访问可视化web
+    networks:
+      - backend
+    restart: always
+  
+  # 添加告警模块
+  alertmanager:
+    build:
+      context: ./alertmanager
+    container_name: alertmanager
+    ports:
+      - "${ALERTMANAGER_PORT}:9093"
+    volumes:
+      - "./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml"
+      - ${DATA_PATH_HOST}/prometheus/data/alertmanager:/alertmanager/data
+      - "./alertmanager/templetes:/etc/alertmanager/templates"
     networks:
       - backend
     restart: always
@@ -178,6 +196,8 @@ services:
       context: ./grafana
     environment:
       - TZ=${TZ}
+    volumes:
+      - ${DATA_PATH_HOST}/grafana/grafana_data:/var/lib/grafana
     ports:
       - "${GRAFANA_PORT}:3000"                        # 设置容器3000端口映射指定宿主机端口，用于宿主机访问可视化web
     networks:
@@ -222,6 +242,8 @@ services:
       - MONGO_INITDB_DATABASE=${MONGO_MANAGE_DATABASE} # *.js 中默认的数据库
     ports:
       - ${MONGO_PORT}:27017
+    networks:
+      - backend
     volumes:
       - ${DATA_PATH_HOST}/mongo:/data/db
       - ${LOG_PATH_HOST}/mongo:/var/log/mongodb
@@ -247,6 +269,8 @@ services:
     ports:
       - "${KIBANA_PORT}:5601"
     container_name: "kibana"
+    networks:
+      - backend
     #restart: always
     depends_on:
       - elasticsearch

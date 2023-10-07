@@ -1,0 +1,42 @@
+global:
+  resolve_timeout: 1m
+  smtp_smarthost: 'smtp.qq.com:465'
+  smtp_from: '1015693563@qq.com'
+  smtp_auth_username: '1015693563@qq.com'
+  smtp_auth_password: '邮箱授权码'
+  smtp_hello: '@qq.com'
+  smtp_require_tls: false
+  
+  
+route:
+  group_by: [alertname] #通过 alertname 的值对告警进行分类,- alert: 物理节点 cpu 使用率
+  group_wait: 10s #一组告警第一次发送之前等待的延迟时间，即产生告警后延迟 10 秒钟将组内新产生的消息一起合并发送(一般设置为 0 秒 ~ 几分钟)。
+  group_interval: 2m #一组已发送过初始通知的告警接收到新告警后，下次发送通知前等待的延迟时间(一般设置为 5 分钟或更多)。
+  repeat_interval: 2m #一条成功发送的告警，在最终发送通知之前等待的时间(通常设置为 3 小时或更长时间)。
+#间隔示例：
+  #group_wait: 10s #第一次产生告警，等待 10s，组内有告警就一起发出，没有其它告警就单独发出。
+  #group_interval: 2m #第二次产生告警，先等待 2 分钟，2 分钟后还没有恢复就进入 repeat_interval。
+  #repeat_interval: 5m #在最终发送消息前再等待 5 分钟，5 分钟后还没有恢复就发送第二次告警。
+  receiver: wechat
+
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'       # Alertmanager微信告警模板
+  
+receivers: #定义接收者
+  - name: 'wechat' #企业微信接受者
+    wechat_configs:
+    - corp_id: wx6a0ea86bad408069
+      message: '{{ template "wechat.default.message" . }}'
+      # to_user: '@all'       #定义发送给公司组织架构下所有人
+      to_user: '00614411'       #定义发送给公司的指定人
+      # to_party: 2            #定义发送给组织架构下组ID为2的所有用户
+      agent_id: 1000027      #定义微信应用机器人的agent_id
+      api_secret: qMjNeGwhCHY3gcffIX8ynFQw95YAuZSvroJMhdq1tAw   #定义
+      send_resolved: true
+
+inhibit_rules: #抑制的规则
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'dev', 'instance']
