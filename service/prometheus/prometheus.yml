@@ -12,8 +12,6 @@ alerting:
 # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
 rule_files:
   - "/opt/bitnami/prometheus/conf/group.yml"
-  # - "first_rules.yml"
-  # - "second_rules.yml"
 
 # A scrape configuration containing exactly one endpoint to scrape:
 # Here it's Prometheus itself.
@@ -21,22 +19,11 @@ scrape_configs:
   - job_name: 'golang服务' #服务的名称
     scrape_interval: 5s
     metrics_path: /metrics  #获取指标的url
-    static_configs:
-      - targets: [
-        '192.168.21.23:8990',
-        "mini-test.xdjy100.com",
-        # "192.168.22.149",
-        # "192.168.22.149:8991",
-        # "192.168.22.149:8993",
-        # "192.168.22.149:8994",
-        # "192.168.22.149:8995",
-        # "192.168.22.149:8999",
-        # "192.168.22.149:8996",
-        # "192.168.22.149:8950",
-        # "192.168.22.149:8930",
-        # "192.168.22.149:8940",
-        # "192.168.22.149:8960",
-        # "192.168.22.149:8970",
-        # "192.168.22.149:8980",
-        # "192.168.22.149:8290"
-        ] # 这个为监听指定服务服务的ip和port，需要修改为自己的ip，貌似云服务必须用公网ip
+    file_sd_configs: #替换static_configs
+      - files:
+        - /opt/prometheus/config/nodes/nodes.json #指定文件路径
+        refresh_interval: 10s #重新加载文件列表目标时间间隔 
+    # static_configs:
+      # - targets: [
+      #   '192.168.21.23:8990',
+        # ] # 这个为监听指定服务服务的ip和port，需要修改为自己的ip，貌似云服务必须用公网ip

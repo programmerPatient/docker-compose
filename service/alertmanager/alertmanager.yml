@@ -25,14 +25,14 @@ templates:
 receivers: #定义接收者
   - name: 'wechat' #企业微信接受者
     wechat_configs:
-    - corp_id: wx6a0ea86bad408069
+    - corp_id: ""
       message: '{{ template "wechat.default.message" . }}'
       # to_user: '@all'       #定义发送给公司组织架构下所有人
-      to_user: '00614411'       #定义发送给公司的指定人，多人使用|连接示例：00614411|123231
+      to_user: ''       #定义发送给公司的指定人，多人使用|连接示例：006das14411|12dsad3231
       # to_party: 2            #定义发送给组织架构下组ID为2的所有用户
-      agent_id: 1000027      #定义微信应用机器人的agent_id
-      api_secret: qMjNeGwhCHY3gcffIX8ynFQw95YAuZSvroJMhdq1tAw   #定义
-      send_resolved: true
+      agent_id: {企业微信应用机器人的agent_id}      #定义企业微信应用机器人的agent_id
+      api_secret: {自己的企业微信的secret}   #定义
+      send_resolved: true #报警恢复通知
 
 inhibit_rules: #抑制的规则
   - source_match:

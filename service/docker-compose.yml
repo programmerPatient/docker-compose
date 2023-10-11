@@ -168,6 +168,7 @@ services:
     volumes:
       - ${DATA_PATH_HOST}/prometheus/prometheus:/etc/prometheus
       - ${DATA_PATH_HOST}/prometheus/prometheus_data:/prometheus
+      - ./prometheus/nodes.json:/opt/prometheus/config/nodes/nodes.json
       - ./prometheus/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml  # 将 prometheus 配置文件挂载到容器里
       - ./prometheus/group.yml:/opt/bitnami/prometheus/conf/group.yml  # 将 prometheus 配置文件挂载到容器里
     ports:
