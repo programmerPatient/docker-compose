@@ -16,7 +16,7 @@ services:
       - ${DATA_PATH_HOST}/prometheus/prometheus:/etc/prometheus
       - ${DATA_PATH_HOST}/prometheus/prometheus_data:/prometheus
       - ${CONFIG_PATH_HOST}/prometheus/nodes.json:/opt/prometheus/config/nodes/nodes.json
-      - ${CONFIG_PATH_HOST}/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml  # 将 prometheus 配置文件挂载到容器里
+      - ${CONFIG_PATH_HOST}/prometheus/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml  # 将 prometheus 配置文件挂载到容器里
       - ${CONFIG_PATH_HOST}/prometheus/group.yml:/opt/bitnami/prometheus/conf/group.yml  # 将 prometheus 配置文件挂载到容器里
     ports:
       - "${PROMETHEUS_PORT}:9090"                     # 设置容器9090端口映射指定宿主机端口，用于宿主机访问可视化web
@@ -32,9 +32,9 @@ services:
     ports:
       - "${ALERTMANAGER_PORT}:9093"
     volumes:
-      - "./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml"
+      - "${CONFIG_PATH_HOST}/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml"
+      - "${CONFIG_PATH_HOST}/alertmanager/templetes:/etc/alertmanager/templates"
       - ${DATA_PATH_HOST}/prometheus/data/alertmanager:/alertmanager/data
-      - "./alertmanager/templetes:/etc/alertmanager/templates"
     networks:
       - monitoring_platform
     restart: always
