@@ -8,7 +8,7 @@
   alerting:
     alertmanagers:
     - static_configs:
-      - targets: ['192.168.21.23:9093']
+      - targets: ['127.0.0.1']
   # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
   rule_files:
     - "/opt/bitnami/prometheus/conf/group.yml"
@@ -18,35 +18,20 @@
   # A scrape configuration containing exactly one endpoint to scrape:
   # Here it's Prometheus itself.
   scrape_configs:
-    - job_name: '行动教育小程序golang服务' #服务的名称
+    - job_name: '服务名称' #服务的名称
       scrape_interval: 5s
-      metrics_path: /go/metrics  #获取指标的url
+      metrics_path: /metrics  #获取指标的url
 
       #基于文件的自动发现
       # file_sd_configs: #替换static_configs
       #   - files:
       #     - /opt/prometheus/config/nodes/nodes.json #指定文件路径
       #     refresh_interval: 10s #重新加载文件列表目标时间间隔 
+
       #基于url的自动发现
       http_sd_configs:
-        - url: http://192.168.21.23:8083/api/go/common/service_discovery
+        - url: "http://127.0.0.1"
           refresh_interval: 10s #重新加载文件列表目标时间间隔 
-
-      
-    - job_name: '行动教育小程序php服务' #服务的名称
-      scrape_interval: 5s
-      metrics_path: /php_metrics  #获取指标的url
-
-      #基于文件的自动发现
-      # file_sd_configs: #替换static_configs
-      #   - files:
-      #     - /opt/prometheus/config/nodes/nodes.json #指定文件路径
-      #     refresh_interval: 10s #重新加载文件列表目标时间间隔 
-      #基于url的自动发现
-      http_sd_configs:
-        - url: http://192.168.21.23:8083/api/go/common/service_discovery
-          refresh_interval: 10s #重新加载文件列表目标时间间隔 
-      
       #基于静态配置的服务发现
       # static_configs:
         # - targets: [
