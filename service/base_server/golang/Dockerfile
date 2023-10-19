@@ -36,17 +36,26 @@ RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 USER root
 RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
+
+# 安装 air 工具
+USER root
+RUN go install github.com/cosmtrek/air@latest
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+ENTRYPOINT ["air"]
+
 # $GOPATH/bin添加到环境变量中
 ENV PATH $GOPATH/bin:$PATH
+
 
 # 清理垃圾
 USER root
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     rm /var/log/lastlog /var/log/faillog
+    
 
 # 设置工作目录
-WORKDIR /usr/src/code
+WORKDIR /var/www
 
 EXPOSE 8000
 EXPOSE 8001

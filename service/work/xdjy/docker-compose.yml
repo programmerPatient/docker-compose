@@ -1,0 +1,125 @@
+#xdjy开发环境
+version: '3.5'
+# 网络配置
+networks:
+  xdjy:
+    driver: ${NETWORKS_DRIVER}
+# 服务容器配置
+services:
+  nginx:                                # 自定义容器名称
+    build:
+      context: ../../base_server/nginx                  # 指定构建使用的 Dockerfile 文件
+    environment:                        # 设置环境变量
+      - TZ=${TZ}
+    volumes:  
+      - ${CODE_PATH_HOST}:/var/www:rw                         # 设置挂载目录
+      - ${LOG_PATH_HOST}/nginx/:/var/log/nginx/:rw                    # 设置挂载目录
+      - ${CONFIG_PATH_HOST}/nginx/nginx.conf:/etc/nginx/nginx.conf:rw  # 引用 .env 配置中 WWW_PATH_HOST 变量，将宿主机上代码存放的目录挂载到容器中 /usr/share/nginx/html 目录
+      - ${CONFIG_PATH_HOST}/nginx/conf.d:/etc/nginx/conf.d/:rw  # 引用 .env 配置中 WWW_PATH_HOST 变量，将宿主机上代码存放的目录挂载到容器中 /usr/share/nginx/html 目录
+    ports:                              # 设置端口映射
+      - "${NGINX_PORT}:80"
+      - "${XDJY_APPLET_PORT}:8080"
+      - "${XDJY_DISP_FORM_PORT}:8081"
+      - "${XDJY_WEBSITE_PORT}:8083"
+    networks:
+      - xdjy
+    restart: always                      # 指定容器退出后的重启策略为始终重启
+
+  golang:                                # 自定义容器名称
+    build:
+      context: ../../base_server/golang                  # 指定构建使用的 Dockerfile 文件
+    environment:                         # 设置环境变量
+      - TZ=${TZ}
+    privileged: true
+    volumes:                             # 设置挂载目录
+      - ${CODE_PATH_HOST}:/var/www:rw                    # 设置挂载目录
+    user: root  # 设置使用 root 用户权限
+    # working_dir: /var/www/go/xdjy-applets-by-go #工作文件夹
+    # command: #容器启动执行的命令
+    #   - "air"
+    stdin_open: true                     # 打开标准输入，可以接受外部输入
+    tty: true
+    networks:
+      - xdjy
+    restart: always                      # 指定容器退出后的重启策略为始终重启
+
+  php7.4:
+    build: 
+      context: ../../base_server/php/7.4
+    environment:                         # 设置环境变量
+      - TZ=${TZ}
+    privileged: true #给用户root权限
+    volumes:
+      - ${CODE_PATH_HOST}:/var/www:rw                    # 设置挂载目录
+      - ${CONFIG_PATH_HOST}/php/7.4:/usr/local/etc/php:rw
+    ports:
+      - "${PHP74_PORT}:9000"                          # 设置容器9000端口映射指定宿主机端口
+    restart: always
+    networks:
+      - xdjy
+  
+  php8.0:
+    build: 
+      context: ../../base_server/php/8.0
+      args:
+        PHP_VERSION: php:${PHP80_VERSION}-fpm-alpine
+        CONTAINER_PACKAGE_URL: ${CONTAINER_PACKAGE_URL}
+        PHP_EXTENSIONS: ${PHP80_EXTENSIONS}
+        TZ: "$TZ"
+    privileged: true #给用户root权限
+    volumes:
+      - ${CONFIG_PATH_HOST}/php/8.0/php.ini:/usr/local/etc/php/php.ini:ro
+      - ${CONFIG_PATH_HOST}/php/8.0/php-fpm.conf:/usr/local/etc/php-fpm.d/www.conf:rw
+      - ${LOG_PATH_HOST}/php/8.0:/var/log/php
+      - ${DATA_PATH_HOST}/composer:/tmp/composer
+      - ${CODE_PATH_HOST}:/var/www:rw                    # 设置挂载目录
+    restart: always
+    networks:
+      - xdjy
+
+  mysql:
+    build:
+      context: ../../base_server/mysql
+    environment:
+      - TZ=${TZ}
+      - MYSQL_USER=${MYSQL_USERNAME}                  # 设置 Mysql 用户名称
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}              # 设置 Mysql 用户密码
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}    # 设置 Mysql root 用户密码
+    privileged: true
+    volumes:
+      - ${DATA_PATH_HOST}/mysql:/var/lib/mysql        # 引用 .env 配置中 DATA_PATH_HOST 变量，将宿主机上存放 Mysql 数据的目录挂载到容器中 /var/lib/mysql 目录
+    ports:
+      - "${MYSQL_PORT}:3306"                          # 设置容器3306端口映射指定宿主机端口
+    networks:
+      - xdjy
+    restart: always
+
+  redis:
+    build:
+      context: ../../base_server/redis
+    environment:
+      - TZ=${TZ}
+    privileged: true
+    volumes:
+      - ${DATA_PATH_HOST}/redis:/data                 # 引用 .env 配置中 DATA_PATH_HOST 变量，将宿主机上存放 Redis 数据的目录挂载到容器中 /data 目录
+    ports:
+      - "${REDIS_PORT}:6379"                          # 设置容器6379端口映射指定宿主机端口
+    networks:
+      - xdjy
+    restart: always
+
+  mongo:
+    build:
+      context: ../../base_server/mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_MANAGE_USER_NAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_MANAGE_USER_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_MANAGE_DATABASE} # *.js 中默认的数据库
+    ports:
+      - ${MONGO_PORT}:27017
+    networks:
+      - xdjy
+    volumes:
+      - ${DATA_PATH_HOST}/mongo:/data/db
+      - ${LOG_PATH_HOST}/mongo:/var/log/mongodb
+      - ${CONFIG_PATH_HOST}/mongo:/etc/mongo

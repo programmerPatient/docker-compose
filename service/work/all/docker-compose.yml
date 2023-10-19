@@ -8,7 +8,7 @@ networks:
 services:
   golang:                                # 自定义容器名称
     build:
-      context: ./golang                  # 指定构建使用的 Dockerfile 文件
+      context: ../../base_server/golang                  # 指定构建使用的 Dockerfile 文件
     environment:                         # 设置环境变量
       - TZ=${TZ}
     privileged: true
@@ -30,7 +30,7 @@ services:
     restart: always                      # 指定容器退出后的重启策略为始终重启
   mysql:
     build:
-      context: ./mysql
+      context: ../../base_server/mysql
     environment:
       - TZ=${TZ}
       - MYSQL_USER=${MYSQL_USERNAME}                  # 设置 Mysql 用户名称
@@ -47,7 +47,7 @@ services:
 
   redis:
     build:
-      context: ./redis
+      context: ../../base_server/redis
     environment:
       - TZ=${TZ}
     privileged: true
@@ -60,7 +60,7 @@ services:
     restart: always
   redis-search:
     build:
-      context: ./redis-search
+      context: ../../base_server/redis-search
     environment:
       - TZ=${TZ}
     privileged: true
@@ -76,7 +76,7 @@ services:
   #redis集群配置start
   redis-cluster-master:
     build:
-      context: ./redis-cluster/redis-master
+      context: ../../base_server/redis-cluster/redis-master
     environment:
       - TZ=${TZ}
       # - REDIS_REPLICATION_MODE=master
@@ -93,7 +93,7 @@ services:
     restart: always
   redis-cluster-slave1:
     build:
-      context: ./redis-cluster/redis-slave1
+      context: ../../base_server/redis-cluster/redis-slave1
     environment:
       - TZ=${TZ}
     privileged: true
@@ -108,7 +108,7 @@ services:
     restart: always
   redis-cluster-slave2:
     build:
-      context: ./redis-cluster/redis-slave2
+      context: ../../base_server/redis-cluster/redis-slave2
     environment:
       - TZ=${TZ}
     privileged: true
@@ -125,7 +125,7 @@ services:
 
   mysql-manage:
     build:
-      context: ./mysql-manage
+      context: ../../base_server/mysql-manage
     environment:
       - TZ=${TZ}
       - PMA_ARBITRARY=1
@@ -144,7 +144,7 @@ services:
 
   redis-manage:
     build:
-      context: ./redis-manage
+      context: ../../base_server/redis-manage
     environment:
       - TZ=${TZ}
       - ADMIN_USER=${REDIS_MANAGE_USERNAME}           # 设置 Redis 可视化管理的用户名称
@@ -161,16 +161,16 @@ services:
 
   prometheus:
     build:
-      context: ./prometheus
+      context: ../../base_server/prometheus
     environment:
       - TZ=${TZ}
     privileged: true
     volumes:
       - ${DATA_PATH_HOST}/prometheus/prometheus:/etc/prometheus
       - ${DATA_PATH_HOST}/prometheus/prometheus_data:/prometheus
-      - ./prometheus/nodes.json:/opt/prometheus/config/nodes/nodes.json
-      - ./prometheus/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml  # 将 prometheus 配置文件挂载到容器里
-      - ./prometheus/group.yml:/opt/bitnami/prometheus/conf/group.yml  # 将 prometheus 配置文件挂载到容器里
+      - ../../base_server/prometheus/nodes.json:/opt/prometheus/config/nodes/nodes.json
+      - ../../base_server/prometheus/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml  # 将 prometheus 配置文件挂载到容器里
+      - ../../base_server/prometheus/group.yml:/opt/bitnami/prometheus/conf/group.yml  # 将 prometheus 配置文件挂载到容器里
     ports:
       - "${PROMETHEUS_PORT}:9090"                     # 设置容器9090端口映射指定宿主机端口，用于宿主机访问可视化web
     networks:
@@ -180,21 +180,21 @@ services:
   # 添加告警模块
   alertmanager:
     build:
-      context: ./alertmanager
+      context: ../../base_server/alertmanager
     container_name: alertmanager
     ports:
       - "${ALERTMANAGER_PORT}:9093"
     volumes:
-      - "./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml"
+      - "../../base_server/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml"
       - ${DATA_PATH_HOST}/prometheus/data/alertmanager:/alertmanager/data
-      - "./alertmanager/templetes:/etc/alertmanager/templates"
+      - "../../base_server/alertmanager/templetes:/etc/alertmanager/templates"
     networks:
       - backend
     restart: always
 
   grafana:
     build:
-      context: ./grafana
+      context: ../../base_server/grafana
     environment:
       - TZ=${TZ}
     volumes:
@@ -207,7 +207,7 @@ services:
 
   jaeger:
     build:
-      context: ./jaeger
+      context: ../../base_server/jaeger
     environment:
       - TZ=${TZ}
     ports:
@@ -218,7 +218,7 @@ services:
 
   dtm:
     build:
-      context: ./dtm
+      context: ../../base_server/dtm
     environment:
       - TZ=${TZ}
     entrypoint:
@@ -226,7 +226,7 @@ services:
       - "-c=/app/dtm/configs/config.yaml"
     privileged: true
     volumes:
-      - ./dtm/config.yml:/app/dtm/configs/config.yaml # 将 dtm 配置文件挂载到容器里
+      - ../../base_server/dtm/config.yml:/app/dtm/configs/config.yaml # 将 dtm 配置文件挂载到容器里
     ports:
       - "${DTM_HTTP_PORT}:36789"
       - "${DTM_GRPC_PORT}:36790"
@@ -236,7 +236,7 @@ services:
   
   mongo:
     build:
-      context: ./mongo
+      context: ../../base_server/mongo
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_MANAGE_USER_NAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_MANAGE_USER_PASSWORD}
@@ -251,7 +251,7 @@ services:
       - ${CONFIG_PATH_HOST}/mongo:/etc/mongo
   elasticsearch:
     build:
-      context: ./elasticsearch
+      context: ../../base_server/elasticsearch
     ports:
       - "${ELASTICSEARCH_PORT1}:9200"
       - "${ELASTICSEARCH_PORT2}:9300"
@@ -266,7 +266,7 @@ services:
       - ${CONFIG_PATH_HOST}/elasticsearch/plugins:/usr/share/elasticsearch/plugins
   kibana:
     build:
-      context: ./kibana
+      context: ../../base_server/kibana
     ports:
       - "${KIBANA_PORT}:5601"
     container_name: "kibana"
@@ -296,3 +296,38 @@ services:
       - RABBITMQ_DEFAULT_USER=guest  # 账号
       - RABBITMQ_DEFAULT_PASS=guest  # 密码
       - RABBITMQ_ERLANG_COOKIE=hellocookie
+    networks:
+      - backend
+  php7.4:
+    build: 
+      context: ../../base_server/php/7.4
+    environment:                         # 设置环境变量
+      - TZ=${TZ}
+    privileged: true #给用户root权限
+    volumes:
+      - ${CODE_PATH_HOST}:/var/www:rw                    # 设置挂载目录
+      - ${CONFIG_PATH_HOST}/php/7.4:/usr/local/etc/php:rw
+    ports:
+      - "${PHP74_PORT}:9000"                          # 设置容器9000端口映射指定宿主机端口
+    restart: always
+    networks:
+      - backend
+  
+  php8.0:
+    build: 
+      context: ../../base_server/php/8.0
+      args:
+        PHP_VERSION: php:${PHP80_VERSION}-fpm-alpine
+        CONTAINER_PACKAGE_URL: ${CONTAINER_PACKAGE_URL}
+        PHP_EXTENSIONS: ${PHP80_EXTENSIONS}
+        TZ: "$TZ"
+    privileged: true #给用户root权限
+    volumes:
+      - ${CONFIG_PATH_HOST}/php/8.0/php.ini:/usr/local/etc/php/php.ini:ro
+      - ${CONFIG_PATH_HOST}/php/8.0/php-fpm.conf:/usr/local/etc/php-fpm.d/www.conf:rw
+      - ${LOG_PATH_HOST}/php/8.0:/var/log/php
+      - ${DATA_PATH_HOST}/composer:/tmp/composer
+      - ${CODE_PATH_HOST}:/var/www:rw                    # 设置挂载目录
+    restart: always
+    networks:
+      - backend
