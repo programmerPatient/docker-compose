@@ -59,6 +59,24 @@ services:
     restart: always
     networks:
       - xdjy
+  php7.3:
+    build: 
+      context: ../../base_server/php/7.3
+      args:
+        PHP_VERSION: php:${PHP73_VERSION}-fpm-alpine
+        CONTAINER_PACKAGE_URL: ${CONTAINER_PACKAGE_URL}
+        PHP_EXTENSIONS: ${PHP73_EXTENSIONS}
+        TZ: "$TZ"
+    privileged: true #给用户root权限
+    volumes:
+      - ${CONFIG_PATH_HOST}/php/7.3/php.ini:/usr/local/etc/php/php.ini:ro
+      - ${CONFIG_PATH_HOST}/php/7.3/php-fpm.conf:/usr/local/etc/php-fpm.d/www.conf:rw
+      - ${LOG_PATH_HOST}/php/7.3:/var/log/php
+      - ${DATA_PATH_HOST}/composer:/tmp/composer
+      - ${CODE_PATH_HOST}:/var/www:rw                    # 设置挂载目录
+    restart: always
+    networks:
+      - xdjy
   
   php8.0:
     build: 
