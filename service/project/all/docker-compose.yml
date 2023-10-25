@@ -159,9 +159,9 @@ services:
     volumes:
       - ${DATA_PATH_HOST}/prometheus/prometheus:/etc/prometheus
       - ${DATA_PATH_HOST}/prometheus/prometheus_data:/prometheus
-      - ../../base_server/prometheus/nodes.json:/opt/prometheus/config/nodes/nodes.json
-      - ../../base_server/prometheus/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml  # 将 prometheus 配置文件挂载到容器里
-      - ../../base_server/prometheus/group.yml:/opt/bitnami/prometheus/conf/group.yml  # 将 prometheus 配置文件挂载到容器里
+      - ${CONFIG_PATH_HOST}/prometheus/nodes.json:/opt/prometheus/config/nodes/nodes.json
+      - ${CONFIG_PATH_HOST}/prometheus/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml  # 将 prometheus 配置文件挂载到容器里
+      - ${CONFIG_PATH_HOST}/prometheus/group.yml:/opt/bitnami/prometheus/conf/group.yml  # 将 prometheus 配置文件挂载到容器里
     ports:
       - "${PROMETHEUS_PORT}:9090"                     # 设置容器9090端口映射指定宿主机端口，用于宿主机访问可视化web
     networks:
@@ -176,9 +176,9 @@ services:
     ports:
       - "${ALERTMANAGER_PORT}:9093"
     volumes:
-      - "../../base_server/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml"
+      - "${CONFIG_PATH_HOST}/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml"
       - ${DATA_PATH_HOST}/prometheus/data/alertmanager:/alertmanager/data
-      - "../../base_server/alertmanager/templetes:/etc/alertmanager/templates"
+      - "${CONFIG_PATH_HOST}/alertmanager/templetes:/etc/alertmanager/templates"
     networks:
       - backend
     restart: always
@@ -217,7 +217,7 @@ services:
       - "-c=/app/dtm/configs/config.yaml"
     privileged: true
     volumes:
-      - ../../base_server/dtm/config.yml:/app/dtm/configs/config.yaml # 将 dtm 配置文件挂载到容器里
+      - ${CONFIG_PATH_HOST}/dtm/config.yml:/app/dtm/configs/config.yaml # 将 dtm 配置文件挂载到容器里
     ports:
       - "${DTM_HTTP_PORT}:36789"
       - "${DTM_GRPC_PORT}:36790"
@@ -277,16 +277,16 @@ services:
     restart: always
     hostname: rabbitmq
     ports:
-      - 15672:15672
+      - ${RABBITMQ_PORT}:15672
     # 容器卷
     volumes:
       - ${DATA_PATH_HOST}/data/rabbitmq/:/var/lib/rabbitmq
       - ${CONFIG_PATH_HOST}/rabbitmq/rabbitmq.sh:/etc/rabbitmq/rabbitmq.sh
     # 环境配置
     environment:
-      - RABBITMQ_DEFAULT_USER=guest  # 账号
-      - RABBITMQ_DEFAULT_PASS=guest  # 密码
-      - RABBITMQ_ERLANG_COOKIE=hellocookie
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}  # 账号
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}  # 密码
+      - RABBITMQ_ERLANG_COOKIE=${RABBITMQ_ERLANG_COOKIE}
     networks:
       - backend
   php7.4:

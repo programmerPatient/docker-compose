@@ -1,0 +1,12 @@
+groups: # groups：组告警
+- name: general.rules # name：组名。报警规则组名称
+  rules:   # rules：定义角色
+  - alert: 服务器服务  # alert：告警名称。 任何实例5分钟内无法访问发出告警
+    expr: up == 0     # expr：表达式。 up = 0 相当于指标挂掉了
+    for: 10s     # for：持续时间。 表示持续一分钟获取不到信息，则触发报警。0表示不使> 
+    labels: # labels：定义当前告警规则级别
+      severity: error       # severity: 指定告警级别。
+    annotations:     # annotations: 注释 告警通知
+      # 调用标签具体指附加通知信息
+      summary: "{{ $labels.job }}服务状态" # 告警主题
+      description: "{{ $labels.job }}" #告警详情
