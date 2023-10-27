@@ -268,25 +268,25 @@ services:
       - elasticsearch
     volumes:
       - ${CONFIG_PATH_HOST}/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
-  rabbitmq:
+  rabbitmq3.12:
     #镜像  这个版本可以到docker-hub去获取自己想要的版本
-    image: rabbitmq:3.9.13-management
+    image: ../../base_server/rabbitmq/3.12
     # 容器名
-    container_name: rabbitmq
+    container_name: rabbitmq3.12
     # 是否支持重启
     restart: always
-    hostname: rabbitmq
+    hostname: rabbitmq3.12
     ports:
-      - ${RABBITMQ_PORT}:15672
+      - ${RABBITMQ3_12_PORT}:15672
     # 容器卷
     volumes:
-      - ${DATA_PATH_HOST}/data/rabbitmq/:/var/lib/rabbitmq
-      - ${CONFIG_PATH_HOST}/rabbitmq/rabbitmq.sh:/etc/rabbitmq/rabbitmq.sh
+      - ${DATA_PATH_HOST}/data/rabbitmq/3.12/:/var/lib/rabbitmq
+      - ${CONFIG_PATH_HOST}/rabbitmq/3.12/rabbitmq.sh:/etc/rabbitmq/rabbitmq.sh
     # 环境配置
     environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}  # 账号
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}  # 密码
-      - RABBITMQ_ERLANG_COOKIE=${RABBITMQ_ERLANG_COOKIE}
+      - RABBITMQ3_12_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}  # 账号
+      - RABBITMQ3_12_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}  # 密码
+      - RABBITMQ3_12_ERLANG_COOKIE=${RABBITMQ_ERLANG_COOKIE}
     networks:
       - backend
   php7.4:

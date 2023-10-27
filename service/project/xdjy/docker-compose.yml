@@ -21,6 +21,7 @@ services:
       - "${XDJY_APPLET_PORT}:8080"
       - "${XDJY_DISP_FORM_PORT}:8081"
       - "${XDJY_WEBSITE_PORT}:8083"
+      - "${XDJY_IT_HELP_CENTER_PORT}:8082"
     networks:
       - xdjy
     restart: always                      # 指定容器退出后的重启策略为始终重启
@@ -34,7 +35,23 @@ services:
     volumes:                             # 设置挂载目录
       - ${CODE_PATH_HOST}:/var/www:rw                    # 设置挂载目录
     user: root  # 设置使用 root 用户权限
-    working_dir: /var/www/ #工作文件夹
+    working_dir: /var/www/go #工作文件夹
+    stdin_open: true                     # 打开标准输入，可以接受外部输入
+    tty: true
+    networks:
+      - xdjy
+    restart: always                      # 指定容器退出后的重启策略为始终重启
+
+  golang1.21:                                # 自定义容器名称
+    build:
+      context: ../../base_server/golang/1.21                  # 指定构建使用的 Dockerfile 文件
+    environment:                         # 设置环境变量
+      - TZ=${TZ}
+    privileged: true
+    volumes:                             # 设置挂载目录
+      - ${CODE_PATH_HOST}:/var/www:rw                    # 设置挂载目录
+    user: root  # 设置使用 root 用户权限
+    working_dir: /var/www/go #工作文件夹
     stdin_open: true                     # 打开标准输入，可以接受外部输入
     tty: true
     networks:
@@ -56,6 +73,7 @@ services:
       - ${LOG_PATH_HOST}/php/7.4:/var/log/php
       - ${DATA_PATH_HOST}/composer:/tmp/composer
       - ${CODE_PATH_HOST}:/var/www:rw                    # 设置挂载目录
+    working_dir: /var/www/php #工作文件夹
     restart: always
     networks:
       - xdjy
@@ -68,6 +86,7 @@ services:
         PHP_EXTENSIONS: ${PHP73_EXTENSIONS}
         TZ: "$TZ"
     privileged: true #给用户root权限
+    working_dir: /var/www/php #工作文件夹
     volumes:
       - ${CONFIG_PATH_HOST}/php/7.3/php.ini:/usr/local/etc/php/php.ini:ro
       - ${CONFIG_PATH_HOST}/php/7.3/php-fpm.conf:/usr/local/etc/php-fpm.d/www.conf:rw
@@ -93,6 +112,7 @@ services:
       - ${LOG_PATH_HOST}/php/8.0:/var/log/php
       - ${DATA_PATH_HOST}/composer:/tmp/composer
       - ${CODE_PATH_HOST}:/var/www:rw                    # 设置挂载目录
+    working_dir: /var/www/php #工作文件夹
     restart: always
     networks:
       - xdjy
@@ -143,3 +163,34 @@ services:
       - ${DATA_PATH_HOST}/mongo:/data/db
       - ${LOG_PATH_HOST}/mongo:/var/log/mongodb
       - ${CONFIG_PATH_HOST}/mongo:/etc/mongo
+  rabbitmq3.12:
+    build:
+      context: ../../base_server/rabbitmq/3.12
+    # 容器名
+    container_name: rabbitmq3.12
+    # 是否支持重启
+    restart: always
+    ports:
+      - ${RABBITMQ3_12_PORT}:15672
+    # 容器卷
+    volumes:
+      - ${DATA_PATH_HOST}/data/rabbitmq/3.12/:/var/lib/rabbitmq
+      - ${CONFIG_PATH_HOST}/rabbitmq/3.12/rabbitmq.sh:/etc/rabbitmq/rabbitmq.sh
+    # 环境配置
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ3_12_DEFAULT_USER}  # 账号
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ3_12_DEFAULT_PASS}  # 密码
+      - RABBITMQ_ERLANG_COOKIE=${RABBITMQ3_12_ERLANG_COOKIE}
+    networks:
+      - xdjy
+  kafka:
+    image: 'bitnami/kafka:latest'
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    networks:
+      - xdjy
