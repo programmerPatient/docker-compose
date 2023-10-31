@@ -15,18 +15,23 @@ USER root
 # RUN echo "deb http://mirrors.aliyun.com/debian-security/ buster/updates main contrib non-free" >> /etc/apt/sources.list
 
 
-# 使用网易源镜像（Debian 10 Buster）
+# # 使用网易源镜像（Debian 10 Buster）
 # RUN echo "deb http://mirrors.163.com/debian/ buster main contrib non-free" > /etc/apt/sources.list
 # RUN echo "deb http://mirrors.163.com/debian/ buster-updates main contrib non-free" >> /etc/apt/sources.list
 # RUN echo "deb http://mirrors.163.com/debian/ buster-backports main contrib non-free" >> /etc/apt/sources.list
 # RUN echo "deb http://mirrors.163.com/debian-security/ buster/updates main contrib non-free" >> /etc/apt/sources.list
 
 # 使用中国科技大学源镜像（Debian 10 Buster）
-RUN echo "deb http://mirrors.ustc.edu.cn/debian/ buster main contrib non-free" > /etc/apt/sources.list
-RUN echo "deb http://mirrors.ustc.edu.cn/debian/ buster-updates main contrib non-free" >> /etc/apt/sources.list
-RUN echo "deb http://mirrors.ustc.edu.cn/debian/ buster-backports main contrib non-free" >> /etc/apt/sources.list
-RUN echo "deb http://mirrors.ustc.edu.cn/debian-security/ buster/updates main contrib non-free" >> /etc/apt/sources.list
+# RUN echo "deb http://mirrors.ustc.edu.cn/debian/ buster main contrib non-free" > /etc/apt/sources.list
+# RUN echo "deb http://mirrors.ustc.edu.cn/debian/ buster-updates main contrib non-free" >> /etc/apt/sources.list
+# RUN echo "deb http://mirrors.ustc.edu.cn/debian/ buster-backports main contrib non-free" >> /etc/apt/sources.list
+# RUN echo "deb http://mirrors.ustc.edu.cn/debian-security/ buster/updates main contrib non-free" >> /etc/apt/sources.list
 
+# 使用清华大学源镜像（Debian 10 Buster）
+RUN echo "deb http://mirrors.tuna.tsinghua.edu.cn/debian/ buster main contrib non-free" > /etc/apt/sources.list
+RUN echo "deb http://mirrors.tuna.tsinghua.edu.cn/debian/ buster-updates main contrib non-free" >> /etc/apt/sources.list
+RUN echo "deb http://mirrors.tuna.tsinghua.edu.cn/debian/ buster-backports main contrib non-free" >> /etc/apt/sources.list
+RUN echo "deb http://mirrors.tuna.tsinghua.edu.cn/debian-security/ buster/updates main contrib non-free" >> /etc/apt/sources.list
 
 
 RUN apt-get update && \
