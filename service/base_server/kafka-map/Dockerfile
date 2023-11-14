@@ -1,0 +1,1 @@
+FROM dushixiang/kafka-map

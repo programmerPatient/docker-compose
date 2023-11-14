@@ -347,3 +347,13 @@ services:
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
     networks:
       - backend
+  kafka-map:
+    build: 
+      context: ../../base_server/kafka-map
+    environment:
+      - DEFAULT_USERNAME=${DEFAULT_USERNAME}
+      - DEFAULT_PASSWORD=${DEFAULT_PASSWORD}
+    ports:
+      - ${SERVER_PORT}:8080
+    networks:
+      - backend
