@@ -4,6 +4,7 @@ networks:
   scrapAcquisition:
     driver: ${NETWORKS_DRIVER}
 services:
+  ##################################### Kafka start ##########################################
   kafka1:
     image: 'bitnami/kafka:3.3.1'
     networks:
@@ -133,3 +134,54 @@ services:
       - DEFAULT_PASSWORD=${DEFAULT_PASSWORD}
     ports:
       - ${SERVER_PORT}:8080
+##################################### Kafka end ##########################################
+
+##################################### RocketMQ start #######################################
+  rmqnamesrv:
+    build:
+      context: ../../base_server/rocketmq/4.4.0
+    container_name: rmqnamesrv
+    restart: always
+    ports:
+      - ${RMQNAMESRV_PORT}:9876
+    environment:
+    #内存分配
+      JAVA_OPT_EXT: "-server -Xms1g -Xmx1g"
+    volumes:
+      - ${LOG_PATH_HOST}/rmqnamesrv:/root/logs
+    command: sh mqnamesrv
+    networks:
+      - scrapAcquisition
+          
+  rmqbroker:
+    build:
+      context: ../../base_server/rocketmq/4.4.0
+    container_name: rmqbroker
+    restart: always
+    depends_on:
+      - rmqnamesrv
+    ports:
+      - ${RMQBROKER_1_PORT}:10909
+      - ${RMQBROKER_2_PORT}:10911
+    volumes:
+      - ${LOG_PATH_HOST}/rmqbroker:/root/logs
+      - ${DATA_PATH_HOST}/rmqbroker:/root/store
+      - ${CONFIG_PATH_HOST}/rmqbroker/4.4.0/broker.conf:/opt/rocketmq-4.4.0/conf/broker.conf
+    command: sh mqbroker  -c /opt/rocketmq-4.4.0/conf/broker.conf
+    environment:
+      NAMESRV_ADDR: "rmqnamesrv:9876"
+      JAVA_OPT_EXT: "-server -Xms1g -Xmx1g -Xmn1g"
+    networks:
+      - scrapAcquisition
+          
+  rocketmq-dashboard:
+    build:
+      context: ../../base_server/rocketmq-dashboard/1.0.0
+    ports:
+      - ${DASHBORD_PORT}:8080
+    environment:
+      JAVA_OPTS: "-Drocketmq.namesrv.addr=rmqnamesrv:9876"
+    restart: always
+    networks:
+      - scrapAcquisition
+##################################### RocketMQ end #######################################
