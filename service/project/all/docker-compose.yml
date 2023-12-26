@@ -342,7 +342,7 @@ services:
       - ${LOG_PATH_HOST}/rmqnamesrv:/root/logs
     command: sh mqnamesrv
     networks:
-      - scrapAcquisition
+      - backend
           
   rmqbroker:
     build:
@@ -363,7 +363,7 @@ services:
       NAMESRV_ADDR: "rmqnamesrv:9876"
       JAVA_OPT_EXT: "-server -Xms1g -Xmx1g -Xmn1g"
     networks:
-      - scrapAcquisition
+      - backend
           
   rocketmq-dashboard:
     build:
@@ -374,5 +374,5 @@ services:
       JAVA_OPTS: "-Drocketmq.namesrv.addr=rmqnamesrv:9876"
     restart: always
     networks:
-      - scrapAcquisition
+      - backend
 ##################################### RocketMQ end #######################################
