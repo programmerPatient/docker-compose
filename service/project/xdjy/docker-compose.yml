@@ -122,9 +122,9 @@ services:
     build: 
       context: ../../base_server/php/8.1
       args:
-        PHP_VERSION: php:${PHP80_VERSION}-fpm-alpine
+        PHP_VERSION: php:${PHP81_VERSION}-fpm-alpine
         CONTAINER_PACKAGE_URL: ${CONTAINER_PACKAGE_URL}
-        PHP_EXTENSIONS: ${PHP80_EXTENSIONS}
+        PHP_EXTENSIONS: ${PHP81_EXTENSIONS}
         TZ: "$TZ"
     privileged: true #给用户root权限
     volumes:

@@ -62,7 +62,7 @@ RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 # 安装 air 工具
 USER root
-RUN go install github.com/cosmtrek/air@latest
+RUN go install github.com/cosmtrek/air@v1.42.0
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 ENTRYPOINT ["air"]
 

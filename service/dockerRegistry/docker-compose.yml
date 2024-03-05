@@ -1,0 +1,21 @@
+version: "3"
+services: 
+    registry:
+        privileged: true     #这里把权限配置成true
+        image: registry      #镜像来源
+        restart: always      #开机后自己启动
+        container_name: registry   #自定义服务名
+        ports:               #暴露端口
+            - 5003:5000
+        volumes:            #挂载目录配置
+            - ./registry/data:/var/lib/registry
+    web:
+        image: konradkleine/docker-registry-frontend:v2   
+        links:
+             - registry:docker-registry.com # 服务名：这里适使用自定义的名字 ，env可以直接使用这个名字去调用
+        restart: always
+        ports:
+             - 5004:80
+        environment:
+             - ENV_DOCKER_REGISTRY_HOST=docker-registry.com #配置links的自定义名字
+             - ENV_DOCKER_REGISTRY_PORT=5000
